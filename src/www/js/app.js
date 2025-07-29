@@ -45,6 +45,9 @@ new Vue({
     currentRelease: null,
     latestRelease: null,
 
+    bandwidthResult: null,
+    bandwidthTesting: false,
+
     chartOptions: {
       chart: {
         background: 'transparent',
@@ -238,6 +241,19 @@ new Vue({
       this.api.updateClientAddress({ clientId: client.id, address })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
+    },
+
+    async runBandwidthTest() {
+      this.bandwidthTesting = true;
+      this.bandwidthResult = null;
+      try {
+        const result = await this.api.testBandwidth({});
+        this.bandwidthResult = result;
+      } catch (err) {
+        alert(err.message || err.toString());
+      } finally {
+        this.bandwidthTesting = false;
+      }
     },
   },
   filters: {

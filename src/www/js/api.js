@@ -117,4 +117,13 @@ class API {
     });
   }
 
+  async testBandwidth({ size = 10 * 1024 * 1024 } = {}) {
+    const start = performance.now();
+    await fetch(`./api/bandwidth?size=${size}`, { method: 'get' })
+      .then(res => res.arrayBuffer());
+    const duration = (performance.now() - start) / 1000;
+    const mbps = (size * 8) / (duration * 1000 * 1000);
+    return { mbps, duration };
+  }
+
 }
