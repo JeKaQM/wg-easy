@@ -135,6 +135,28 @@ module.exports = class Server {
         return WireGuard.updateClientAddress({ clientId, address });
       }))
 
+      // Bandwidth test endpoint
+      .get('/api/bandwidth', (req, res) => {
+        const size = parseInt(req.query.size, 10) || 10 * 1024 * 1024; // default 10MB
+        res.writeHead(200, {
+          'Content-Type': 'application/octet-stream',
+          'Content-Length': size,
+        });
+        const chunk = Buffer.alloc(Math.min(size, 64 * 1024));
+        let sent = 0;
+        (function write() {
+          while (sent < size) {
+            const toSend = Math.min(chunk.length, size - sent);
+            if (!res.write(chunk.slice(0, toSend))) {
+              res.once('drain', write);
+              return;
+            }
+            sent += toSend;
+          }
+          res.end();
+        }());
+      })
+
       .listen(PORT, () => {
         debug(`Listening on http://0.0.0.0:${PORT}`);
       });
